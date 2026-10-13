@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply for Loan — Bank Loan Management System</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <div>
+                <a href="/dashboard.html" class="brand-title">🏦 Bank Loan Management System</a>
+                <div class="brand-subtitle">DBMS Practical Project — Oracle 11g XE</div>
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="/dashboard.html" class="nav-link" data-nav="dashboard">Home / Dashboard</a></li>
+                    <li><a href="/apply.html" class="nav-link" data-nav="apply">Apply for Loan</a></li>
+                    <li><a href="/applications.html" class="nav-link" data-nav="applications">View Applications</a></li>
+                    <li><a href="/sql-demo.html" class="nav-link" data-nav="sql-demo">SQL Queries (DBMS)</a></li>
+                    <li><a href="/connectivity.html" class="nav-link" data-nav="connectivity">Database Connectivity</a></li>
+                </ul>
+            </nav>
+            <div id="userNavArea" class="user-status"></div>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1 class="page-title">Apply for Loan</h1>
+        <p class="page-subtitle">Enter applicant personal, employment, and financial information to process eligibility and save into Oracle tables</p>
+
+        <div id="alertBox"></div>
+
+        <!-- Eligibility Result Box -->
+        <div id="resultBox" class="card" style="display: none; background: #F0FDF4; border-color: #86EFAC;">
+            <h2 class="card-title" style="color: #15803D; margin-bottom: 0.75rem;">Eligibility Result</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 0.75rem;">
+                <div>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Requested Amount:</span>
+                    <div id="resReqAmt" style="font-weight: 700; font-size: 1.15rem; color: var(--primary-blue);">--</div>
+                </div>
+                <div>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Maximum Eligible Loan:</span>
+                    <div id="resMaxAmt" style="font-weight: 700; font-size: 1.15rem; color: #15803D;">--</div>
+                </div>
+                <div>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Eligibility Status:</span>
+                    <div><span id="resOutcomeBadge" class="badge">--</span></div>
+                </div>
+            </div>
+            <p id="resReasonText" style="font-size: 0.9rem; color: var(--text-dark); margin-bottom: 0.5rem;"></p>
+            <div style="font-size: 0.75rem; color: var(--text-muted); background: #FFFFFF; padding: 0.5rem; border-radius: 4px; border: 1px solid #DCFCE7;">
+                <strong>Academic Disclaimer:</strong> This is an educational eligibility calculation for DBMS demonstration purposes, not an actual bank sanction.
+            </div>
+        </div>
+
+        <form id="applyForm">
+            <div class="card">
+                <!-- 1. Personal Details -->
+                <div class="form-section">1. Personal Details (Saved to table: CUSTOMERS)</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label required" for="fullName">Full Name</label>
+                        <input type="text" id="fullName" class="form-control" placeholder="Enter applicant full name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="email">Email Address</label>
+                        <input type="email" id="email" class="form-control" placeholder="e.g. name@example.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="phone">Phone Number</label>
+                        <input type="tel" id="phone" class="form-control" placeholder="e.g. 9876543210" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="age">Age</label>
+                        <input type="number" id="age" class="form-control" min="18" max="80" placeholder="e.g. 28" required>
+                        <span class="form-hint">Constraint: Age must be between 18 and 80</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="gender">Gender</label>
+                        <select id="gender" class="form-control" required>
+                            <option value="MALE">Male</option>
+                            <option value="FEMALE">Female</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="panNumber">PAN Number</label>
+                        <input type="text" id="panNumber" class="form-control" placeholder="e.g. ABCDE1234F" maxlength="10" style="text-transform: uppercase;" required>
+                        <span class="form-hint">Unique 10-character PAN</span>
+                    </div>
+
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="form-label required" for="address">Address</label>
+                        <input type="text" id="address" class="form-control" placeholder="Residential address" required>
+                    </div>
+                </div>
+
+                <!-- 2. Employment Details -->
+                <div class="form-section">2. Employment Details (Saved to table: EMPLOYMENT_DETAILS)</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label required" for="employmentType">Employment Type</label>
+                        <select id="employmentType" class="form-control" required>
+                            <option value="SALARIED">Salaried Employee</option>
+                            <option value="SELF_EMPLOYED">Self-Employed / Business</option>
+                            <option value="BUSINESS">Business Proprietor</option>
+                            <option value="PROFESSIONAL">Licensed Professional</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="employerName">Employer / Business Name</label>
+                        <input type="text" id="employerName" class="form-control" placeholder="e.g. Infosys, TCS, or Self" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="monthlyIncome">Monthly Income (₹)</label>
+                        <input type="number" id="monthlyIncome" class="form-control" min="0" step="500" placeholder="e.g. 50000" required>
+                    </div>
+                </div>
+
+                <!-- 3. Financial Details -->
+                <div class="form-section">3. Financial Details (Saved to table: FINANCIAL_DETAILS)</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label required" for="currentBalance">Current Bank Balance (₹)</label>
+                        <input type="number" id="currentBalance" class="form-control" min="0" placeholder="e.g. 100000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="avgMonthlyBalance">Average Monthly Balance (₹)</label>
+                        <input type="number" id="avgMonthlyBalance" class="form-control" min="0" placeholder="e.g. 80000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="monthlyTurnover">Monthly Turnover (₹)</label>
+                        <input type="number" id="monthlyTurnover" class="form-control" min="0" placeholder="e.g. 60000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="yearlyTurnover">Yearly Turnover (₹)</label>
+                        <input type="number" id="yearlyTurnover" class="form-control" min="0" placeholder="e.g. 720000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="existingMonthlyEmis">Existing Monthly EMI (₹)</label>
+                        <input type="number" id="existingMonthlyEmis" class="form-control" min="0" placeholder="Enter 0 if no ongoing loans" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="creditScore">Credit Score (300 - 900)</label>
+                        <input type="number" id="creditScore" class="form-control" min="300" max="900" value="750" required>
+                    </div>
+                </div>
+
+                <!-- 4. Loan Details -->
+                <div class="form-section">4. Loan Details (Saved to table: LOAN_APPLICATIONS)</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label required" for="loanTypeId">Loan Type</label>
+                        <select id="loanTypeId" class="form-control" required>
+                            <option value="">Loading loan schemes from Oracle...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="requestedAmount">Requested Loan Amount (₹)</label>
+                        <input type="number" id="requestedAmount" class="form-control" min="10000" step="10000" placeholder="e.g. 1000000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="tenureMonths">Loan Tenure (Months)</label>
+                        <input type="number" id="tenureMonths" class="form-control" min="6" max="360" value="60" required>
+                    </div>
+
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="form-label required" for="purpose">Loan Purpose</label>
+                        <input type="text" id="purpose" class="form-control" placeholder="e.g. Higher Education / Home Purchase / Business Expansion" required>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1rem; flex-wrap: wrap; gap: 0.75rem;">
+                    <button type="button" id="btnCheckOnly" class="btn btn-secondary">
+                        ⚡ Check Eligibility Only
+                    </button>
+                    <button type="submit" id="btnSubmitForm" class="btn btn-primary">
+                        💾 Submit & Save to Oracle Database
+                    </button>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script>
+        initStudentNavbar('apply');
+
+        async function loadLoanTypes() {
+            const res = await API.getLoanTypes();
+            const select = document.getElementById('loanTypeId');
+            if (res && res.ok && Array.isArray(res.data)) {
+                select.innerHTML = res.data.map(lt => `
+                    <option value="${lt.loanTypeId}">${escapeHtml(lt.loanName)} (Interest: ${lt.interestRate}% p.a.)</option>
+                `).join('');
+            } else {
+                select.innerHTML = '<option value="">Error loading loan types from Oracle</option>';
+            }
+        }
+
+        function getFormData() {
+            return {
+                fullName: document.getElementById('fullName').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                age: document.getElementById('age').value,
+                gender: document.getElementById('gender').value,
+                panNumber: document.getElementById('panNumber').value.trim().toUpperCase(),
+                address: document.getElementById('address').value.trim(),
+                employmentType: document.getElementById('employmentType').value,
+                employerName: document.getElementById('employerName').value.trim(),
+                designation: 'Executive',
+                monthlyIncome: document.getElementById('monthlyIncome').value,
+                experienceYears: '4',
+                officeAddress: 'City Office',
+                currentBalance: document.getElementById('currentBalance').value,
+                avgMonthlyBalance: document.getElementById('avgMonthlyBalance').value,
+                monthlyTurnover: document.getElementById('monthlyTurnover').value,
+                yearlyTurnover: document.getElementById('yearlyTurnover').value,
+                existingMonthlyEmis: document.getElementById('existingMonthlyEmis').value,
+                creditScore: document.getElementById('creditScore').value,
+                loanTypeId: document.getElementById('loanTypeId').value,
+                requestedAmount: document.getElementById('requestedAmount').value,
+                tenureMonths: document.getElementById('tenureMonths').value,
+                purpose: document.getElementById('purpose').value.trim()
+            };
+        }
+
+        function showResult(elig) {
+            const box = document.getElementById('resultBox');
+            box.style.display = 'block';
+            document.getElementById('resReqAmt').textContent = formatCurrency(elig.requestedAmount);
+            document.getElementById('resMaxAmt').textContent = formatCurrency(elig.maxEligibleAmount);
+            document.getElementById('resReasonText').textContent = elig.reason || '';
+
+            const badge = document.getElementById('resOutcomeBadge');
+            badge.textContent = elig.outcome === 'ELIGIBLE' ? 'Eligible' : (elig.outcome === 'CONDITIONAL' ? 'Conditionally Eligible' : 'Not Eligible');
+            if (elig.outcome === 'ELIGIBLE') {
+                badge.className = 'badge badge-green';
+            } else if (elig.outcome === 'CONDITIONAL') {
+                badge.className = 'badge badge-yellow';
+            } else {
+                badge.className = 'badge badge-red';
+            }
+            box.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Button: Check Eligibility Only
+        document.getElementById('btnCheckOnly').addEventListener('click', async () => {
+            const data = getFormData();
+            if (!data.monthlyIncome || !data.requestedAmount) {
+                alert('Please fill at least Monthly Income and Requested Loan Amount to calculate eligibility.');
+                return;
+            }
+
+            const res = await API.calculateEligibility({
+                loanTypeId: data.loanTypeId,
+                requestedAmount: data.requestedAmount,
+                tenureMonths: data.tenureMonths,
+                monthlyIncome: data.monthlyIncome,
+                existingMonthlyEmis: data.existingMonthlyEmis,
+                currentBalance: data.currentBalance,
+                avgMonthlyBalance: data.avgMonthlyBalance,
+                creditScore: data.creditScore
+            });
+
+            if (res && res.ok && res.data) {
+                showResult(res.data);
+            } else {
+                document.getElementById('alertBox').innerHTML = `<div class="alert alert-error">Calculation error: ${escapeHtml(res?.data?.message || 'Error')}</div>`;
+            }
+        });
+
+        // Form Submit: Save to Oracle Database
+        document.getElementById('applyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitForm');
+            const data = getFormData();
+
+            btn.disabled = true;
+            btn.textContent = 'Saving to Oracle Database...';
+
+            const res = await API.submitApplication(data);
+            btn.disabled = false;
+            btn.textContent = '💾 Submit & Save to Oracle Database';
+
+            const alertBox = document.getElementById('alertBox');
+            if (res && res.ok && res.data.success) {
+                alertBox.innerHTML = `
+                    <div class="alert alert-success">
+                        <strong>✅ Success! Loan Application #${res.data.applicationId} has been saved in the Oracle database.</strong><br>
+                        Customer ID: #${res.data.customerId} | Status: <strong>${escapeHtml(res.data.status)}</strong><br>
+                        <a href="/applications.html" style="color: #15803D; font-weight: bold; text-decoration: underline;">View in Applications List →</a>
+                    </div>
+                `;
+                if (res.data.eligibility) {
+                    showResult(res.data.eligibility);
+                }
+            } else {
+                alertBox.innerHTML = `<div class="alert alert-error">Database Error: ${escapeHtml(res?.data?.message || 'Transaction failed')}</div>`;
+            }
+        });
+
+        loadLoanTypes();
+    </script>
+</body>
+</html>

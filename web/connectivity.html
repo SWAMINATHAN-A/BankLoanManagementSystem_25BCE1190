@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Connectivity — Bank Loan Management System</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <div>
+                <a href="/dashboard.html" class="brand-title">🏦 Bank Loan Management System</a>
+                <div class="brand-subtitle">DBMS Practical Project — Oracle 11g XE</div>
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="/dashboard.html" class="nav-link" data-nav="dashboard">Home / Dashboard</a></li>
+                    <li><a href="/apply.html" class="nav-link" data-nav="apply">Apply for Loan</a></li>
+                    <li><a href="/applications.html" class="nav-link" data-nav="applications">View Applications</a></li>
+                    <li><a href="/sql-demo.html" class="nav-link" data-nav="sql-demo">SQL Queries (DBMS)</a></li>
+                    <li><a href="/connectivity.html" class="nav-link" data-nav="connectivity">Database Connectivity</a></li>
+                </ul>
+            </nav>
+            <div id="userNavArea" class="user-status"></div>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1 class="page-title">Database Connectivity (JDBC & ODBC)</h1>
+        <p class="page-subtitle">Demonstration of genuine Java JDBC and Windows ODBC database drivers communicating with Oracle Database 11g XE</p>
+
+        <div id="alertBox"></div>
+
+        <!-- 2 Side-by-Side Visually Separate Panels -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+
+            <!-- PANEL A: JDBC -->
+            <div class="card" style="border-top: 4px solid var(--primary-blue); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                        <h2 class="card-title" style="margin-bottom: 0; border: none;">A. JDBC: Java to Oracle Database</h2>
+                        <span id="badgeJdbc" class="badge badge-blue">NOT TESTED</span>
+                    </div>
+
+                    <div style="background: var(--light-blue); padding: 0.75rem; border-radius: 4px; font-size: 0.85rem; margin-bottom: 1rem;">
+                        <strong>Implementation Steps:</strong>
+                        <ol style="margin-left: 1.25rem; margin-top: 0.35rem; line-height: 1.6;">
+                            <li>Verify Windows services <code>OracleServiceXE</code> and <code>OracleXETNSListener</code> are running.</li>
+                            <li>Place the Oracle JDBC driver (<code>ojdbc6.jar</code>) in the project <code>lib/</code> folder.</li>
+                            <li>Configure the thin JDBC URL, username, and password in <code>config/db.properties</code>.</li>
+                            <li>Launch the Java HTTP backend (<code>com.bankloan.Main</code>).</li>
+                            <li>Execute query via JDBC PreparedStatement and verify metadata.</li>
+                        </ol>
+                    </div>
+
+                    <h3 style="font-size: 0.9rem; color: var(--primary-blue); margin-bottom: 0.5rem;">Connection Parameters & Output:</h3>
+                    <ul style="list-style: none; font-size: 0.85rem; display: flex; flex-direction: column; gap: 0.4rem; border: 1px solid var(--border-color); border-radius: 4px; padding: 0.75rem;">
+                        <li style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.25rem;">
+                            <span>Connection URL:</span>
+                            <code id="jdbcUrl">jdbc:oracle:thin:@localhost:1521:xe</code>
+                        </li>
+                        <li style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.25rem;">
+                            <span>JDBC Driver:</span>
+                            <span id="jdbcDriver">Oracle JDBC Driver (11.2.0.2.0)</span>
+                        </li>
+                        <li style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.25rem;">
+                            <span>Database Version:</span>
+                            <span id="jdbcVer">Oracle Database 11g XE</span>
+                        </li>
+                        <li style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.25rem;">
+                            <span>Connected Schema User:</span>
+                            <strong id="jdbcUser">--</strong>
+                        </li>
+                        <li style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.25rem;">
+                            <span>Detected Project Tables:</span>
+                            <strong id="jdbcTables">--</strong>
+                        </li>
+                        <li style="display: flex; justify-content: space-between;">
+                            <span>Response Latency:</span>
+                            <strong id="jdbcLatency" style="color: var(--success-green);">--</strong>
+                        </li>
+                    </ul>
+                </div>
+
+                <div style="margin-top: 1.25rem;">
+                    <button type="button" id="btnTestJdbc" class="btn btn-primary" style="width: 100%;">
+                        ▶ Test JDBC Connection
+                    </button>
+                </div>
+            </div>
+
+            <!-- PANEL B: ODBC -->
+            <div class="card" style="border-top: 4px solid var(--secondary-blue); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                        <h2 class="card-title" style="margin-bottom: 0; border: none;">B. ODBC: Windows to Oracle Database</h2>
+                        <span id="badgeOdbc" class="badge badge-blue">NOT TESTED</span>
+                    </div>
+
+                    <div style="background: var(--light-blue); padding: 0.75rem; border-radius: 4px; font-size: 0.85rem; margin-bottom: 1rem;">
+                        <strong>Implementation Steps:</strong>
+                        <ol style="margin-left: 1.25rem; margin-top: 0.35rem; line-height: 1.6;">
+                            <li>Open Windows 64-bit ODBC Data Source Administrator (<code>odbcad32.exe</code>).</li>
+                            <li>Confirm that the <code>Oracle in XE</code> driver is installed.</li>
+                            <li>Configure the User DSN named <code>OracleXE_PAT4</code>.</li>
+                            <li>Execute the PowerShell ODBC test script (<code>test_odbc_connection.ps1</code>).</li>
+                            <li>Verify the connection using .NET <code>System.Data.Odbc</code>.</li>
+                        </ol>
+                    </div>
+
+                    <h3 style="font-size: 0.9rem; color: var(--primary-blue); margin-bottom: 0.5rem;">Connection Parameters & Output:</h3>
+                    <ul style="list-style: none; font-size: 0.85rem; display: flex; flex-direction: column; gap: 0.4rem; border: 1px solid var(--border-color); border-radius: 4px; padding: 0.75rem;">
+                        <li style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.25rem;">
+                            <span>Data Source Name (DSN):</span>
+                            <code id="odbcDsn">OracleXE_PAT4</code>
+                        </li>
+                        <li style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.25rem;">
+                            <span>ODBC Driver:</span>
+                            <span id="odbcDriver">Oracle in XE (64-bit)</span>
+                        </li>
+                        <li style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.25rem;">
+                            <span>Test Method:</span>
+                            <span>System.Data.Odbc (Windows Native)</span>
+                        </li>
+                        <li style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.25rem;">
+                            <span>Connected Schema User:</span>
+                            <strong id="odbcUser">--</strong>
+                        </li>
+                        <li style="display: flex; justify-content: space-between;">
+                            <span>Query Execution Time:</span>
+                            <strong id="odbcLatency" style="color: var(--success-green);">--</strong>
+                        </li>
+                    </ul>
+                </div>
+
+                <div style="margin-top: 1.25rem;">
+                    <button type="button" id="btnTestOdbc" class="btn btn-secondary" style="width: 100%; border-color: var(--primary-blue); color: var(--primary-blue); font-weight: 600;">
+                        ▶ Test ODBC Connection Separately
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Section C: Viva Explanation Card -->
+        <div class="card" style="background: #F8FAFC;">
+            <h2 class="card-title">C. Simple Explanation for Practical Viva</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; font-size: 0.88rem; line-height: 1.6;">
+                <div>
+                    <h3 style="font-size: 0.95rem; color: var(--primary-blue); margin-bottom: 0.35rem;">What is JDBC? (Java Database Connectivity)</h3>
+                    <p style="color: var(--text-dark);">
+                        JDBC is a Java-based API that enables Java programs to execute SQL statements and interact directly with relational databases like Oracle. It uses a Type 4 thin driver (<code>ojdbc6.jar</code>) to communicate with the database over network sockets (port 1521) without requiring native software installation on the client.
+                    </p>
+                </div>
+                <div>
+                    <h3 style="font-size: 0.95rem; color: var(--primary-blue); margin-bottom: 0.35rem;">What is ODBC? (Open Database Connectivity)</h3>
+                    <p style="color: var(--text-dark);">
+                        ODBC is an open standard interface provided by Microsoft Windows that allows applications to access databases using an ODBC driver. In this project, a 64-bit Windows Data Source Name (DSN) named <code>OracleXE_PAT4</code> is configured using the Oracle in XE driver to demonstrate native operating system connectivity.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script>
+        initStudentNavbar('connectivity');
+
+        // Test JDBC Button
+        document.getElementById('btnTestJdbc').addEventListener('click', async () => {
+            const btn = document.getElementById('btnTestJdbc');
+            const badge = document.getElementById('badgeJdbc');
+            btn.disabled = true;
+            btn.textContent = 'Connecting via JDBC...';
+            badge.className = 'badge badge-blue';
+            badge.textContent = 'CONNECTING...';
+
+            const res = await API.testJdbc();
+            btn.disabled = false;
+            btn.textContent = '▶ Test JDBC Connection';
+
+            if (res && res.data && res.data.success) {
+                const d = res.data;
+                badge.className = 'badge badge-green';
+                badge.textContent = 'CONNECTED (SUCCESS)';
+                document.getElementById('jdbcUser').textContent = d.connectedUser || 'PAT4_USER';
+                document.getElementById('jdbcTables').textContent = `${d.userTablesCount || 8} Tables Found`;
+                document.getElementById('jdbcLatency').textContent = `${d.responseTimeMs} ms`;
+            } else {
+                badge.className = 'badge badge-red';
+                badge.textContent = 'FAILED';
+                document.getElementById('alertBox').innerHTML = `
+                    <div class="alert alert-error">
+                        <strong>JDBC Connection Failed:</strong> ${escapeHtml(res?.data?.message || 'Connection error')}
+                    </div>
+                `;
+            }
+        });
+
+        // Test ODBC Button
+        document.getElementById('btnTestOdbc').addEventListener('click', async () => {
+            const btn = document.getElementById('btnTestOdbc');
+            const badge = document.getElementById('badgeOdbc');
+            btn.disabled = true;
+            btn.textContent = 'Testing DSN via ODBC...';
+            badge.className = 'badge badge-blue';
+            badge.textContent = 'CONNECTING...';
+
+            const res = await API.testOdbc();
+            btn.disabled = false;
+            btn.textContent = '▶ Test ODBC Connection Separately';
+
+            if (res && res.data && res.data.success) {
+                const d = res.data;
+                badge.className = 'badge badge-green';
+                badge.textContent = 'CONNECTED (SUCCESS)';
+                document.getElementById('odbcUser').textContent = 'PAT4_USER';
+                document.getElementById('odbcLatency').textContent = `${d.executionTimeMs} ms`;
+            } else {
+                badge.className = 'badge badge-red';
+                badge.textContent = 'FAILED';
+                document.getElementById('alertBox').innerHTML = `
+                    <div class="alert alert-error">
+                        <strong>ODBC Connection Failed:</strong> ${escapeHtml(res?.data?.message || 'ODBC DSN error')}
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

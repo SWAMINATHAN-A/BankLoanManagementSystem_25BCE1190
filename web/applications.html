@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Applications — Bank Loan Management System</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <div>
+                <a href="/dashboard.html" class="brand-title">🏦 Bank Loan Management System</a>
+                <div class="brand-subtitle">DBMS Practical Project — Oracle 11g XE</div>
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="/dashboard.html" class="nav-link" data-nav="dashboard">Home / Dashboard</a></li>
+                    <li><a href="/apply.html" class="nav-link" data-nav="apply">Apply for Loan</a></li>
+                    <li><a href="/applications.html" class="nav-link" data-nav="applications">View Applications</a></li>
+                    <li><a href="/sql-demo.html" class="nav-link" data-nav="sql-demo">SQL Queries (DBMS)</a></li>
+                    <li><a href="/connectivity.html" class="nav-link" data-nav="connectivity">Database Connectivity</a></li>
+                </ul>
+            </nav>
+            <div id="userNavArea" class="user-status"></div>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1 class="page-title">Loan Applications List</h1>
+        <p class="page-subtitle">Real records retrieved from Oracle table: <code>LOAN_APPLICATIONS</code> joined with <code>CUSTOMERS</code> and <code>LOAN_TYPES</code></p>
+
+        <div id="alertBox"></div>
+
+        <!-- Search and Filter Bar -->
+        <div class="card" style="padding: 0.85rem 1.25rem;">
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
+                <div style="display: flex; gap: 0.5rem; align-items: center; flex: 1; max-width: 420px;">
+                    <input type="text" id="txtSearch" class="form-control" placeholder="Search by applicant name or loan type...">
+                    <button id="btnSearch" class="btn btn-primary" style="padding: 0.55rem 0.9rem;">Search</button>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <label for="filterStatus" style="font-size: 0.85rem; font-weight: 600;">Filter by Status:</label>
+                    <select id="filterStatus" class="form-control">
+                        <option value="ALL">All Applications</option>
+                        <option value="APPROVED">Approved</option>
+                        <option value="UNDER_REVIEW">Under Review</option>
+                        <option value="REJECTED">Rejected</option>
+                        <option value="SUBMITTED">Submitted</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Applications Table -->
+        <div class="card">
+            <h2 class="card-title">All Applications (<span id="countTotal">0</span>)</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Application ID</th>
+                            <th>Applicant Name</th>
+                            <th>Loan Type</th>
+                            <th>Requested Amount</th>
+                            <th>Maximum Eligible Loan</th>
+                            <th>Eligibility Result</th>
+                            <th>Application Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tblAppsBody">
+                        <tr><td colspan="7" style="text-align: center; padding: 1.5rem;">Loading records from Oracle Database...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script>
+        initStudentNavbar('applications');
+
+        async function loadApplications() {
+            const status = document.getElementById('filterStatus').value;
+            const search = document.getElementById('txtSearch').value.trim();
+            const tbody = document.getElementById('tblAppsBody');
+
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Querying Oracle...</td></tr>';
+
+            const res = await API.getApplications(status, search);
+            if (res && res.ok && res.data) {
+                const apps = res.data.applications || [];
+                document.getElementById('countTotal').textContent = apps.length;
+
+                if (apps.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No loan applications found in Oracle.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = apps.map(a => `
+                    <tr>
+                        <td><strong>#${a.applicationId}</strong></td>
+                        <td>${escapeHtml(a.customerName)}</td>
+                        <td>${escapeHtml(a.loanName)}</td>
+                        <td><strong>${formatCurrency(a.requestedAmount)}</strong></td>
+                        <td style="color: #15803D; font-weight: 600;">${formatCurrency(a.calculatedEligibleAmount)}</td>
+                        <td><span class="badge ${a.eligibilityOutcome === 'ELIGIBLE' ? 'badge-green' : (a.eligibilityOutcome === 'CONDITIONAL' ? 'badge-yellow' : 'badge-red')}">${escapeHtml(a.eligibilityOutcome === 'ELIGIBLE' ? 'Eligible' : (a.eligibilityOutcome === 'CONDITIONAL' ? 'Conditional' : 'Not Eligible'))}</span></td>
+                        <td><span class="badge ${a.applicationStatus === 'APPROVED' ? 'badge-green' : (a.applicationStatus === 'UNDER_REVIEW' ? 'badge-yellow' : 'badge-red')}">${escapeHtml(formatStatus(a.applicationStatus))}</span></td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #B91C1C;">Failed to load records from database: ${escapeHtml(res?.data?.message || 'Error')}</td></tr>`;
+            }
+        }
+
+        function formatStatus(status) {
+            if (status === 'UNDER_REVIEW') return 'Under Review';
+            if (status === 'APPROVED') return 'Approved';
+            if (status === 'REJECTED') return 'Rejected';
+            if (status === 'SUBMITTED') return 'Submitted';
+            return status;
+        }
+
+        document.getElementById('btnSearch').addEventListener('click', loadApplications);
+        document.getElementById('filterStatus').addEventListener('change', loadApplications);
+        loadApplications();
+    </script>
+</body>
+</html>

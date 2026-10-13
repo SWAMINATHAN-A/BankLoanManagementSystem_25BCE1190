@@ -1,0 +1,37 @@
+# Compiled Java bytecode
+bin/
+*.class
+src/**/*.class
+
+# Database configuration containing private credentials
+config/db.properties
+db.properties
+
+# Logs and runtime artifacts
+*.log
+logs/
+temp/
+*.tmp
+
+# Operating system and IDE metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.iml
+
+# _____CODES FOR MYSELF_________
+
+# SELECT table_name
+# FROM user_tables
+# ORDER BY table_name;
+
+# SELECT c.full_name,
+# c.email,
+# la.application_id,
+# la.requested_amount,
+# la.application_status
+# FROM customers c
+# JOIN loan_applications la
+# ON c.customer_id = la.customer_id
+# ORDER BY la.application_id DESC;

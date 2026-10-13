@@ -1,0 +1,25 @@
+# ==============================================================================
+# Bank Loan Management System - Database & Server Configuration Template
+# DBMS PAT-4 Practical
+# ==============================================================================
+# INSTRUCTIONS:
+# Copy this file to 'config/db.properties' (or project root 'db.properties')
+# and replace the placeholder values with your actual local Oracle credentials.
+# Never commit 'config/db.properties' with actual credentials to source control.
+# ==============================================================================
+
+# HTTP Application Server Settings
+server.port=8085
+
+# Oracle 11g XE JDBC Connectivity Settings
+# Format: jdbc:oracle:thin:@<host>:<port>:<sid>
+db.driver=oracle.jdbc.OracleDriver
+db.url=jdbc:oracle:thin:@localhost:1521:xe
+db.username=YOUR_ORACLE_USERNAME
+db.password=YOUR_ORACLE_PASSWORD
+
+# Windows ODBC Settings (for genuine ODBC verification)
+odbc.dsn=OracleXE_PAT4
+odbc.driver=Oracle in XE
+odbc.username=YOUR_ORACLE_USERNAME
+odbc.password=YOUR_ORACLE_PASSWORD

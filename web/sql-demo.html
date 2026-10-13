@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SQL Demonstration — Bank Loan Management System</title>
+
+    <link rel="stylesheet" href="/css/styles.css">
+
+</head>
+
+<body>
+
+    <header class="header">
+
+        <div class="header-inner">
+
+            <div>
+
+                <a href="/dashboard.html" class="brand-title">🏦 Bank Loan Management System</a>
+
+                <div class="brand-subtitle">DBMS Practical Project — Oracle 11g XE</div>
+
+            </div>
+
+            <nav>
+
+                <ul class="nav-links">
+
+                    <li><a href="/dashboard.html" class="nav-link" data-nav="dashboard">Home / Dashboard</a></li>
+
+                    <li><a href="/apply.html" class="nav-link" data-nav="apply">Apply for Loan</a></li>
+
+                    <li><a href="/applications.html" class="nav-link" data-nav="applications">View Applications</a></li>
+
+                    <li><a href="/sql-demo.html" class="nav-link" data-nav="sql-demo">SQL Queries (DBMS)</a></li>
+
+                    <li><a href="/connectivity.html" class="nav-link" data-nav="connectivity">Database Connectivity</a></li>
+
+                </ul>
+
+            </nav>
+
+            <div id="userNavArea" class="user-status"></div>
+
+        </div>
+
+    </header>
+
+    <main class="container">
+
+        <h1 class="page-title">DBMS SQL Queries Demonstration</h1>
+
+        <p class="page-subtitle">Demonstration of Data Definition Language (DDL), Data Manipulation Language (DML), and Data Query Language (DQL) in Oracle Database 11g XE</p>
+
+        <div id="alertBox"></div>
+
+        <!-- Section 1: Query Category Tabs / Buttons -->
+
+        <div class="card">
+
+            <h2 class="card-title">1. Select an Academic DBMS Query Category</h2>
+
+            <!-- Category A: DDL -->
+
+            <div style="margin-bottom: 1rem;">
+
+                <span style="font-size: 0.85rem; font-weight: 700; color: var(--primary-blue); display: block; margin-bottom: 0.35rem;">
+
+                    A. DDL (Data Definition Language) — Defines or alters database table structures:
+
+                </span>
+
+                <div class="sql-buttons">
+
+                    <button type="button" class="btn-sql-sample" onclick="loadSample('DDL_CREATE')">
+
+                        DDL: CREATE TABLE (Audit Table)
+
+                    </button>
+
+                    <button type="button" class="btn-sql-sample" onclick="loadSample('DDL_ALTER')">
+
+                        DDL: ALTER TABLE (Add Column to Customers)
+
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- Category B: DML -->
+
+            <div style="margin-bottom: 1rem;">
+
+                <span style="font-size: 0.85rem; font-weight: 700; color: var(--primary-blue); display: block; margin-bottom: 0.35rem;">
+
+                    B. DML (Data Manipulation Language) — Modifies rows inside tables:
+
+                </span>
+
+                <div class="sql-buttons">
+
+                    <button type="button" class="btn-sql-sample" onclick="loadSample('DML_INSERT')">
+
+                        DML: INSERT (Add Demo Applicant Record)
+
+                    </button>
+
+                    <button type="button" class="btn-sql-sample" onclick="loadSample('DML_UPDATE')">
+
+                        DML: UPDATE (Modify Application Status)
+
+                    </button>
+
+                    <button type="button" class="btn-sql-sample" onclick="loadSample('DML_DELETE')">
+
+                        DML: DELETE (Safe Delete on Demo Record)
+
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- Category C: DQL -->
+
+            <div style="margin-bottom: 1rem;">
+
+                <span style="font-size: 0.85rem; font-weight: 700; color: var(--primary-blue); display: block; margin-bottom: 0.35rem;">
+
+                    C. DQL (Data Query Language) — Queries and joins database records:
+
+                </span>
+
+                <div class="sql-buttons">
+
+                    <button type="button" class="btn-sql-sample" onclick="loadSample('DQL_SELECT')">
+
+                        DQL: Simple SELECT on Customers
+
+                    </button>
+
+                    <button type="button" class="btn-sql-sample" onclick="loadSample('DQL_WHERE_ORDER')">
+
+                        DQL: WHERE & ORDER BY (High Value Loans)
+
+                    </button>
+
+                    <button type="button" class="btn-sql-sample" onclick="loadSample('DQL_JOIN')">
+
+                        DQL: 3-Table Relational JOIN
+
+                    </button>
+
+                    <button type="button" class="btn-sql-sample" onclick="loadSample('DQL_GROUP_BY')">
+
+                        DQL: GROUP BY & Aggregation (COUNT, SUM)
+
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- Simple Explanation Box -->
+
+            <div id="queryExplanation" class="alert alert-info" style="margin-bottom: 0.75rem; font-size: 0.85rem;">
+
+                <strong>Explanation:</strong> Select any query above to load its SQL and view its simple explanation.
+
+            </div>
+
+            <!-- SQL Query Box -->
+
+            <textarea id="sqlBox" class="sql-box" rows="5" placeholder="SQL query will appear here..."></textarea>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+
+                <span style="font-size: 0.8rem; color: var(--text-muted);">
+
+                    Executed in Oracle 11g XE. Core tables are protected against destructive drops/truncates.
+
+                </span>
+
+                <button type="button" id="btnRunSql" class="btn btn-primary" style="padding: 0.6rem 1.5rem;">
+
+                    ▶ Run Query in Oracle
+
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- Section 2: Execution Results Card -->
+
+        <div id="outputCard" class="card" style="display: none;">
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 0.75rem;">
+
+                <h2 class="card-title" style="margin-bottom: 0; border: none;">2. Oracle Execution Result</h2>
+
+                <div>
+
+                    <span id="badgeCmdType" class="badge">--</span>
+
+                    <span id="txtExecTime" style="font-size: 0.82rem; color: var(--text-muted); margin-left: 0.5rem;">0 ms</span>
+
+                </div>
+
+            </div>
+
+            <p id="txtOutputMessage" style="font-size: 0.88rem; margin-bottom: 0.75rem; font-weight: 500;"></p>
+
+            <div id="resultTableWrap" class="table-wrap">
+
+                <!-- Dynamically populated table -->
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script>
+        initStudentNavbar('sql-demo');
+
+        const SAMPLES = {
+            DDL_CREATE: {
+                sql: `CREATE TABLE LOAN_AUDIT_LOG (
+    log_id NUMBER(10) PRIMARY KEY,
+    action_type VARCHAR2(30) NOT NULL,
+    record_id NUMBER(10) NOT NULL,
+    action_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)`,
+                desc: "DDL — CREATE TABLE: Creates a new table named LOAN_AUDIT_LOG defining columns and a PRIMARY KEY constraint."
+            },
+            DDL_ALTER: {
+                sql: "ALTER TABLE CUSTOMERS ADD (alternate_phone VARCHAR2(20))",
+                desc: "DDL — ALTER TABLE: Modifies the schema of the existing CUSTOMERS table by adding an alternate phone column."
+            },
+            DML_INSERT: {
+                sql: `INSERT INTO CUSTOMERS (
+    customer_id, full_name, email, phone, age, gender, pan_number, address
+) VALUES (
+    seq_customers.NEXTVAL, 'Sunil Joshi (Demo)', 'sunil.demo@example.com', '9811223344', 29, 'MALE', 'SUNIL9999Z', '12 Demo Enclave, New Delhi'
+)`,
+                desc: "DML — INSERT: Inserts a new customer record into CUSTOMERS using sequence seq_customers."
+            },
+            DML_UPDATE: {
+                sql: "UPDATE LOAN_APPLICATIONS SET application_status = 'UNDER_REVIEW' WHERE application_id = 405",
+                desc: "DML — UPDATE: Modifies the status of loan application #405 in LOAN_APPLICATIONS."
+            },
+            DML_DELETE: {
+                sql: "DELETE FROM CUSTOMERS WHERE email = 'sunil.demo@example.com'",
+                desc: "DML — DELETE: Safely removes only the temporary demo customer record by matching the email."
+            },
+            DQL_SELECT: {
+                sql: "SELECT customer_id, full_name, email, phone, age FROM CUSTOMERS ORDER BY customer_id",
+                desc: "DQL — SELECT: Retrieves customer profile records sorted by customer ID."
+            },
+            DQL_WHERE_ORDER: {
+                sql: "SELECT application_id, customer_id, requested_amount, application_status FROM LOAN_APPLICATIONS WHERE requested_amount >= 2000000 ORDER BY requested_amount DESC",
+                desc: "DQL — WHERE & ORDER BY: Filters applications with requested amount >= 20 Lakhs and sorts in descending order."
+            },
+            DQL_JOIN: {
+                sql: `SELECT 
+    la.application_id, 
+    c.full_name AS applicant_name, 
+    lt.loan_name, 
+    lt.interest_rate, 
+    la.requested_amount, 
+    la.application_status 
+FROM LOAN_APPLICATIONS la 
+JOIN CUSTOMERS c ON la.customer_id = c.customer_id 
+JOIN LOAN_TYPES lt ON la.loan_type_id = lt.loan_type_id 
+ORDER BY la.application_id`,
+                desc: "DQL — Relational JOIN: Combines data from LOAN_APPLICATIONS, CUSTOMERS, and LOAN_TYPES across foreign keys."
+            },
+            DQL_GROUP_BY: {
+                sql: `SELECT 
+    lt.loan_name, 
+    COUNT(la.application_id) AS total_loans, 
+    NVL(SUM(la.requested_amount), 0) AS total_amount, 
+    NVL(AVG(la.requested_amount), 0) AS avg_amount 
+FROM LOAN_TYPES lt 
+LEFT JOIN LOAN_APPLICATIONS la ON lt.loan_type_id = la.loan_type_id 
+GROUP BY lt.loan_name`,
+                desc: "DQL — GROUP BY & Aggregation: Groups records by loan product and computes COUNT, SUM, and AVG."
+            }
+        };
+
+        function loadSample(key) {
+            const item = SAMPLES[key];
+            if (item) {
+                document.getElementById('sqlBox').value = item.sql;
+                document.getElementById('queryExplanation').innerHTML = `<strong>Explanation:</strong> ${escapeHtml(item.desc)}`;
+            }
+        }
+
+        // Load 3-Table Join by default
+        loadSample('DQL_JOIN');
+
+        document.getElementById('btnRunSql').addEventListener('click', async () => {
+            const sql = document.getElementById('sqlBox').value.trim();
+            const btn = document.getElementById('btnRunSql');
+            const card = document.getElementById('outputCard');
+            const tableWrap = document.getElementById('resultTableWrap');
+
+            if (!sql) return;
+
+            btn.disabled = true;
+            btn.textContent = 'Running in Oracle...';
+
+            const res = await API.executeSqlDemo(sql);
+            btn.disabled = false;
+            btn.textContent = '▶ Run Query in Oracle';
+
+            card.style.display = 'block';
+
+            if (res && res.data) {
+                const d = res.data;
+                document.getElementById('badgeCmdType').textContent = d.commandType || 'SQL';
+                document.getElementById('badgeCmdType').className = d.success ? 'badge badge-green' : 'badge badge-red';
+                document.getElementById('txtExecTime').textContent = `${d.executionTimeMs || 0} ms`;
+                document.getElementById('txtOutputMessage').textContent = d.message || '';
+
+                if (d.success && d.commandType === 'DQL' && d.columns && d.rows) {
+                    tableWrap.innerHTML = `
+                        <table>
+                            <thead>
+                                <tr>${d.columns.map(c => `<th>${escapeHtml(c)}</th>`).join('')}</tr>
+                            </thead>
+                            <tbody>
+                                ${d.rows.length === 0 ? '<tr><td colspan="' + d.columns.length + '" style="text-align: center;">Query returned 0 rows.</td></tr>' :
+                                  d.rows.map(r => `<tr>${r.map(v => `<td>${escapeHtml(v !== null ? v : 'NULL')}</td>`).join('')}</tr>`).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else if (d.success) {
+                    tableWrap.innerHTML = `<div class="alert alert-success">${escapeHtml(d.message || 'Command executed successfully in Oracle!')}</div>`;
+                } else {
+                    tableWrap.innerHTML = `<div class="alert alert-error">Execution Error: ${escapeHtml(d.message || 'Execution error')}</div>`;
+                }
+                card.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    </script>
+
+</body>
+
+</html>

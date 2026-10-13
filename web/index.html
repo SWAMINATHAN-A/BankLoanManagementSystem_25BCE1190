@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — Bank Loan Management System</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="login-wrap">
+        <div class="login-card">
+            <div class="login-head">
+                <h1>Bank Loan Management System</h1>
+                <p>DBMS PAT-4 Practical Project</p>
+            </div>
+
+            <div id="alertBox"></div>
+
+            <form id="loginForm">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label class="form-label required" for="username">Username</label>
+                    <input type="text" id="username" class="form-control" placeholder="Enter username (e.g. admin)" required autocomplete="username">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label class="form-label required" for="password">Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="Enter password (e.g. admin123)" required autocomplete="current-password">
+                </div>
+
+                <button type="submit" id="btnSubmit" class="btn btn-primary" style="width: 100%;">
+                    Login to System
+                </button>
+            </form>
+
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); text-align: center;">
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.4rem;">
+                    <strong>College Demonstration Login:</strong>
+                </p>
+                <button type="button" class="btn-sql-sample" onclick="fillCreds('admin', 'admin123')">
+                    Fill Demo Credentials (admin / admin123)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const alertBox = document.getElementById('alertBox');
+
+        if (urlParams.get('msg') === 'required') {
+            showAlert('Please login to continue.', 'info');
+        } else if (urlParams.get('msg') === 'logged_out') {
+            showAlert('You have logged out successfully.', 'success');
+        } else if (urlParams.get('msg') === 'expired') {
+            showAlert('Session expired. Please login again.', 'info');
+        }
+
+        function showAlert(msg, type = 'error') {
+            alertBox.innerHTML = `<div class="alert alert-${type}">${escapeHtml(msg)}</div>`;
+        }
+
+        function fillCreds(u, p) {
+            document.getElementById('username').value = u;
+            document.getElementById('password').value = p;
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit');
+            const u = document.getElementById('username').value.trim();
+            const p = document.getElementById('password').value;
+
+            btn.disabled = true;
+            btn.textContent = 'Verifying with Oracle...';
+
+            const res = await API.login(u, p);
+            btn.disabled = false;
+            btn.textContent = 'Login to System';
+
+            if (res && res.ok && res.data.success) {
+                API.setSession(res.data.token, {
+                    userId: res.data.userId,
+                    username: res.data.username
+                });
+                showAlert('Login successful! Loading dashboard...', 'success');
+                setTimeout(() => {
+                    window.location.href = '/dashboard.html';
+                }, 300);
+            } else {
+                showAlert(res?.data?.message || 'Invalid username or password.');
+            }
+        });
+    </script>
+</body>
+</html>

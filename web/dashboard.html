@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Bank Loan Management System</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <div>
+                <a href="/dashboard.html" class="brand-title">🏦 Bank Loan Management System</a>
+                <div class="brand-subtitle">DBMS Practical Project — Oracle 11g XE</div>
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="/dashboard.html" class="nav-link" data-nav="dashboard">Home / Dashboard</a></li>
+                    <li><a href="/apply.html" class="nav-link" data-nav="apply">Apply for Loan</a></li>
+                    <li><a href="/applications.html" class="nav-link" data-nav="applications">View Applications</a></li>
+                    <li><a href="/sql-demo.html" class="nav-link" data-nav="sql-demo">SQL Queries (DBMS)</a></li>
+                    <li><a href="/connectivity.html" class="nav-link" data-nav="connectivity">Database Connectivity</a></li>
+                </ul>
+            </nav>
+            <div id="userNavArea" class="user-status"></div>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1 class="page-title">Dashboard Overview</h1>
+        <p class="page-subtitle">Summary of loan applications calculated directly from Oracle Database tables</p>
+
+        <div id="alertBox"></div>
+
+        <!-- 4 Simple Metric Boxes -->
+        <div class="metrics-row">
+            <div class="metric-box">
+                <div class="metric-title">Total Applications</div>
+                <div id="statTotalApps" class="metric-value">--</div>
+                <div class="metric-desc">Table: LOAN_APPLICATIONS</div>
+            </div>
+
+            <div class="metric-box" style="border-left-color: #10B981;">
+                <div class="metric-title">Approved Loans</div>
+                <div id="statApproved" class="metric-value">--</div>
+                <div class="metric-desc">Status = 'APPROVED'</div>
+            </div>
+
+            <div class="metric-box" style="border-left-color: #F59E0B;">
+                <div class="metric-title">Under Review</div>
+                <div id="statReview" class="metric-value">--</div>
+                <div class="metric-desc">Status = 'UNDER_REVIEW'</div>
+            </div>
+
+            <div class="metric-box" style="border-left-color: #EF4444;">
+                <div class="metric-title">Rejected Applications</div>
+                <div id="statRejected" class="metric-value">--</div>
+                <div class="metric-desc">Status = 'REJECTED'</div>
+            </div>
+        </div>
+
+        <!-- Recent Applications Table Section -->
+        <div class="card">
+            <h2 class="card-title">Recent Loan Applications</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>App ID</th>
+                            <th>Applicant Name</th>
+                            <th>Loan Type</th>
+                            <th>Requested Amount</th>
+                            <th>Eligibility Result</th>
+                            <th>Loan Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tblRecentApps">
+                        <tr><td colspan="6" style="text-align: center; padding: 1.5rem;">Loading records from Oracle...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top: 1rem; text-align: right;">
+                <a href="/applications.html" class="btn btn-secondary" style="font-size: 0.85rem;">View Full Applications List →</a>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script>
+        initStudentNavbar('dashboard');
+
+        async function loadDashboard() {
+            const res = await API.getDashboardStats();
+            if (res && res.ok && res.data.success) {
+                const d = res.data;
+                document.getElementById('statTotalApps').textContent = d.totalApplications || 0;
+                document.getElementById('statApproved').textContent = d.approvedCount || 0;
+                document.getElementById('statReview').textContent = d.underReviewCount || 0;
+                document.getElementById('statRejected').textContent = d.rejectedCount || 0;
+            } else {
+                document.getElementById('alertBox').innerHTML = `<div class="alert alert-error">Could not load dashboard statistics from database.</div>`;
+            }
+
+            // Load recent rows
+            const appRes = await API.getApplications('ALL', '');
+            const tbody = document.getElementById('tblRecentApps');
+            if (appRes && appRes.ok && appRes.data.applications) {
+                const apps = appRes.data.applications.slice(0, 5);
+                if (apps.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No records found in Oracle database.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = apps.map(a => `
+                    <tr>
+                        <td><strong>#${a.applicationId}</strong></td>
+                        <td>${escapeHtml(a.customerName)}</td>
+                        <td>${escapeHtml(a.loanName)}</td>
+                        <td><strong>${formatCurrency(a.requestedAmount)}</strong></td>
+                        <td><span class="badge ${a.eligibilityOutcome === 'ELIGIBLE' ? 'badge-green' : (a.eligibilityOutcome === 'CONDITIONAL' ? 'badge-yellow' : 'badge-red')}">${escapeHtml(a.eligibilityOutcome)}</span></td>
+                        <td><span class="badge ${a.applicationStatus === 'APPROVED' ? 'badge-green' : (a.applicationStatus === 'UNDER_REVIEW' ? 'badge-yellow' : 'badge-red')}">${escapeHtml(a.applicationStatus)}</span></td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        loadDashboard();
+    </script>
+</body>
+</html>
