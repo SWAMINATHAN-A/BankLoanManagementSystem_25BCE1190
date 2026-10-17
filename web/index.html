@@ -27,18 +27,23 @@
                     <input type="password" id="password" class="form-control" placeholder="Enter password (e.g. admin123)" required autocomplete="current-password">
                 </div>
 
-                <button type="submit" id="btnSubmit" class="btn btn-primary" style="width: 100%;">
-                    Login to System
+                <button type="submit" id="btnSubmit" class="btn btn-primary" style="width: 100%; padding: 0.65rem 1rem; font-size: 0.95rem;">
+                    Sign In to Portal
                 </button>
             </form>
 
-            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); text-align: center;">
-                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.4rem;">
-                    <strong>College Demonstration Login:</strong>
+            <div style="margin-top: 1.6rem; padding-top: 1.15rem; border-top: 1px solid var(--border-subtle); text-align: center;">
+                <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">
+                    Demonstration Accounts
                 </p>
-                <button type="button" class="btn-sql-sample" onclick="fillCreds('admin', 'admin123')">
-                    Fill Demo Credentials (admin / admin123)
-                </button>
+                <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                    <button type="button" class="btn-sql-sample" onclick="fillCreds('admin', 'admin123')" title="System Administrator">
+                        Admin (admin)
+                    </button>
+                    <button type="button" class="btn-sql-sample" onclick="fillCreds('officer1', 'officer123')" title="Credit / Loan Officer">
+                        Loan Officer (officer1)
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -81,7 +86,9 @@
             if (res && res.ok && res.data.success) {
                 API.setSession(res.data.token, {
                     userId: res.data.userId,
-                    username: res.data.username
+                    username: res.data.username,
+                    fullName: res.data.fullName,
+                    role: res.data.role
                 });
                 showAlert('Login successful! Loading dashboard...', 'success');
                 setTimeout(() => {

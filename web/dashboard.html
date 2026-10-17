@@ -59,6 +59,49 @@
             </div>
         </div>
 
+        <!-- Portfolio Health & Distribution Analytics (Visual Enhancement) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+            <!-- Approval Rate Card -->
+            <div class="card" style="margin-bottom: 0;">
+                <h2 class="card-title" style="font-size: 1.05rem;">
+                    <span>Application Approval Rate</span>
+                    <span id="ratePercentBadge" class="badge badge-green">0%</span>
+                </h2>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                    Calculated ratio of approved loan applications against completed processing decisions.
+                </p>
+                <div class="progress-bar-bg">
+                    <div id="approvalBarFill" class="progress-bar-fill" style="width: 0%;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.77rem; color: var(--text-muted); margin-top: 0.45rem;">
+                    <span>0%</span>
+                    <span id="txtApprovalSummary">0 approved out of 0 decisions</span>
+                    <span>100%</span>
+                </div>
+            </div>
+
+            <!-- Fast Quick-Action Card -->
+            <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <h2 class="card-title" style="font-size: 1.05rem;">
+                        <span>Quick System Navigation</span>
+                        <span class="badge badge-blue">Ready</span>
+                    </h2>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                        Direct navigation to teacher evaluation modules and database operations:
+                    </p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                        <a href="/apply.html" class="btn btn-primary btn-sm">New Application</a>
+                        <a href="/sql-demo.html" class="btn btn-secondary btn-sm">SQL Demonstration</a>
+                        <a href="/connectivity.html" class="btn btn-secondary btn-sm">Connectivity (JDBC/ODBC)</a>
+                    </div>
+                </div>
+                <div style="margin-top: 0.75rem; font-size: 0.75rem; color: var(--text-muted); border-top: 1px dashed var(--border-subtle); padding-top: 0.5rem;">
+                    Schema: <strong>PAT4_USER</strong> | Host: <strong>localhost:1521:xe</strong>
+                </div>
+            </div>
+        </div>
+
         <!-- Recent Applications Table Section -->
         <div class="card">
             <h2 class="card-title">Recent Loan Applications</h2>
@@ -97,6 +140,19 @@
                 document.getElementById('statApproved').textContent = d.approvedCount || 0;
                 document.getElementById('statReview').textContent = d.underReviewCount || 0;
                 document.getElementById('statRejected').textContent = d.rejectedCount || 0;
+
+                const approved = d.approvedCount || 0;
+                const rejected = d.rejectedCount || 0;
+                const totalDecided = approved + rejected;
+                const approvalRate = totalDecided > 0 ? Math.round((approved / totalDecided) * 100) : 0;
+
+                const rateBadge = document.getElementById('ratePercentBadge');
+                const fillBar = document.getElementById('approvalBarFill');
+                const summaryTxt = document.getElementById('txtApprovalSummary');
+
+                if (rateBadge) rateBadge.textContent = approvalRate + '%';
+                if (fillBar) fillBar.style.width = approvalRate + '%';
+                if (summaryTxt) summaryTxt.textContent = `${approved} approved out of ${totalDecided} decided applications`;
             } else {
                 document.getElementById('alertBox').innerHTML = `<div class="alert alert-error">Could not load dashboard statistics from database.</div>`;
             }

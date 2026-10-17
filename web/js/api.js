@@ -106,6 +106,10 @@ const API = {
         return this.request(`/api/applications?${query.toString()}`);
     },
 
+    getApplicationDetails(applicationId) {
+        return this.request(`/api/applications/details?id=${encodeURIComponent(applicationId)}`);
+    },
+
     getDashboardStats() {
         return this.request('/api/dashboard');
     },
@@ -138,9 +142,14 @@ function initStudentNavbar(activePage) {
     const navArea = document.getElementById('userNavArea');
     if (navArea) {
         const user = API.getUser();
+        const roleLabel = user?.role === 'OFFICER' ? 'Loan Officer' : 'Administrator';
+        const roleBadgeClass = user?.role === 'OFFICER' ? 'badge-blue' : 'badge-yellow';
         navArea.innerHTML = `
-            <span style="font-size: 0.85rem; color: #E2E8F0;">Logged in as: <strong>${escapeHtml(user?.username || 'User')}</strong></span>
-            <button class="btn-logout" id="btnLogout">Logout</button>
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <span class="user-badge">${escapeHtml(user?.username || 'User')}</span>
+                <span class="badge ${roleBadgeClass}" style="font-size: 0.7rem; padding: 0.15rem 0.45rem;">${roleLabel}</span>
+                <button class="btn-logout" id="btnLogout">Logout</button>
+            </div>
         `;
 
         document.getElementById('btnLogout')?.addEventListener('click', async () => {

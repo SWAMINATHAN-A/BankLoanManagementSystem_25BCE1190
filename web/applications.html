@@ -66,12 +66,54 @@
                             <th>Maximum Eligible Loan</th>
                             <th>Eligibility Result</th>
                             <th>Application Status</th>
+                            <th style="text-align: center;">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="tblAppsBody">
-                        <tr><td colspan="7" style="text-align: center; padding: 1.5rem;">Loading records from Oracle Database...</td></tr>
+                        <tr><td colspan="8" style="text-align: center; padding: 1.5rem;">Loading records from Oracle Database...</td></tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- Application Details & Status Timeline Modal -->
+        <div id="detailsModal" class="modal-overlay">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div>
+                        <h3 id="modalTitle" style="color: var(--primary-blue); font-size: 1.15rem; font-weight: 700;">Application Details</h3>
+                        <span id="modalSub" style="font-size: 0.8rem; color: var(--text-muted);">Oracle Database Record</span>
+                    </div>
+                    <button type="button" class="modal-close" onclick="closeModal()">✕</button>
+                </div>
+
+                <!-- Status Progression Timeline -->
+                <div style="margin-bottom: 1.25rem;">
+                    <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-dark); margin-bottom: 0.25rem;">Lifecycle Status Progression:</div>
+                    <div class="timeline-track">
+                        <div id="stepSubmitted" class="timeline-step">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-label">Submitted</div>
+                        </div>
+                        <div id="stepReview" class="timeline-step">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-label">Under Review</div>
+                        </div>
+                        <div id="stepFinal" class="timeline-step">
+                            <div class="timeline-dot"></div>
+                            <div id="stepFinalLabel" class="timeline-label">Decision</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Content Body -->
+                <div id="modalBody" style="font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.85rem;">
+                    <!-- Filled dynamically -->
+                </div>
+
+                <div style="margin-top: 1.25rem; text-align: right; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal()">Close</button>
+                </div>
             </div>
         </div>
     </main>
@@ -85,7 +127,7 @@
             const search = document.getElementById('txtSearch').value.trim();
             const tbody = document.getElementById('tblAppsBody');
 
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Querying Oracle...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Querying Oracle...</td></tr>';
 
             const res = await API.getApplications(status, search);
             if (res && res.ok && res.data) {
@@ -93,7 +135,7 @@
                 document.getElementById('countTotal').textContent = apps.length;
 
                 if (apps.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No loan applications found in Oracle.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No loan applications found in Oracle.</td></tr>';
                     return;
                 }
 
@@ -106,12 +148,144 @@
                         <td style="color: #15803D; font-weight: 600;">${formatCurrency(a.calculatedEligibleAmount)}</td>
                         <td><span class="badge ${a.eligibilityOutcome === 'ELIGIBLE' ? 'badge-green' : (a.eligibilityOutcome === 'CONDITIONAL' ? 'badge-yellow' : 'badge-red')}">${escapeHtml(a.eligibilityOutcome === 'ELIGIBLE' ? 'Eligible' : (a.eligibilityOutcome === 'CONDITIONAL' ? 'Conditional' : 'Not Eligible'))}</span></td>
                         <td><span class="badge ${a.applicationStatus === 'APPROVED' ? 'badge-green' : (a.applicationStatus === 'UNDER_REVIEW' ? 'badge-yellow' : 'badge-red')}">${escapeHtml(formatStatus(a.applicationStatus))}</span></td>
+                        <td style="text-align: center;">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="viewDetails(${a.applicationId})" title="View detailed profile and status progression">
+                                View Details
+                            </button>
+                        </td>
                     </tr>
                 `).join('');
             } else {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #B91C1C;">Failed to load records from database: ${escapeHtml(res?.data?.message || 'Error')}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #B91C1C;">Failed to load records from database: ${escapeHtml(res?.data?.message || 'Error')}</td></tr>`;
             }
         }
+
+        async function viewDetails(appId) {
+            const modal = document.getElementById('detailsModal');
+            const body = document.getElementById('modalBody');
+            const title = document.getElementById('modalTitle');
+            const sub = document.getElementById('modalSub');
+
+            title.textContent = `Loan Application #${appId}`;
+            sub.textContent = 'Fetching record details from Oracle...';
+            body.innerHTML = '<div style="text-align: center; padding: 1.5rem;">Loading data from database...</div>';
+            modal.style.display = 'flex';
+
+            const res = await API.getApplicationDetails(appId);
+            if (res && res.ok && res.data && res.data.success) {
+                const d = res.data;
+                const app = d.application || {};
+                const custName = app.customerName || d.customer?.fullName || 'N/A';
+                const custAge = app.age || d.customer?.age || 'N/A';
+                const panNum = app.panNumber || d.customer?.panNumber || 'N/A';
+                const email = app.email || d.customer?.email || 'N/A';
+                const phone = app.phone || d.customer?.phone || 'N/A';
+                const address = app.address || d.customer?.address || 'N/A';
+                const empType = app.employmentType || d.employment?.employmentType || 'N/A';
+                const empName = app.employerName || d.employment?.employerName || '';
+                const mIncome = app.monthlyIncome || d.employment?.monthlyIncome || 0;
+                const cScore = app.creditScore || d.financial?.creditScore || 'N/A';
+                const st = app.applicationStatus || 'SUBMITTED';
+
+                sub.textContent = `Applicant: ${escapeHtml(custName)} | Applied on: ${escapeHtml(app.appliedAt || 'N/A')}`;
+
+                // Update Timeline steps
+                const sSub = document.getElementById('stepSubmitted');
+                const sRev = document.getElementById('stepReview');
+                const sFin = document.getElementById('stepFinal');
+                const sFinLbl = document.getElementById('stepFinalLabel');
+
+                sSub.className = 'timeline-step completed';
+                sRev.className = 'timeline-step';
+                sFin.className = 'timeline-step';
+                sFinLbl.textContent = 'Decision';
+
+                if (st === 'UNDER_REVIEW') {
+                    sRev.className = 'timeline-step active';
+                } else if (st === 'APPROVED') {
+                    sRev.className = 'timeline-step completed';
+                    sFin.className = 'timeline-step completed';
+                    sFinLbl.textContent = 'Approved';
+                    sFinLbl.style.color = 'var(--success-green)';
+                } else if (st === 'REJECTED') {
+                    sRev.className = 'timeline-step completed';
+                    sFin.className = 'timeline-step completed';
+                    sFinLbl.textContent = 'Rejected';
+                    sFinLbl.style.color = 'var(--danger-red)';
+                } else {
+                    sSub.className = 'timeline-step active';
+                }
+
+                body.innerHTML = `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; background: #F8FAFC; padding: 0.85rem; border-radius: 6px; border: 1px solid var(--border-color);">
+                        <div><strong>Customer:</strong> ${escapeHtml(custName)} (Age: ${custAge})</div>
+                        <div><strong>PAN Number:</strong> <code>${escapeHtml(panNum)}</code></div>
+                        <div><strong>Email:</strong> ${escapeHtml(email)}</div>
+                        <div><strong>Phone:</strong> ${escapeHtml(phone)}</div>
+                        <div style="grid-column: 1 / -1;"><strong>Address:</strong> ${escapeHtml(address)}</div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem;">
+                        <div style="border: 1px solid var(--border-color); padding: 0.65rem; border-radius: 4px;">
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Employment</div>
+                            <strong>${escapeHtml(empType)}</strong><br>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(empName)}</span>
+                        </div>
+                        <div style="border: 1px solid var(--border-color); padding: 0.65rem; border-radius: 4px;">
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Monthly Income</div>
+                            <strong>${formatCurrency(mIncome)}</strong>
+                        </div>
+                        <div style="border: 1px solid var(--border-color); padding: 0.65rem; border-radius: 4px;">
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Credit Score</div>
+                            <strong style="color: ${(cScore >= 750 ? '#15803D' : (cScore >= 650 ? '#B45309' : '#B91C1C'))}">${cScore}</strong>
+                        </div>
+                        <div style="border: 1px solid var(--border-color); padding: 0.65rem; border-radius: 4px;">
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">DTI Ratio</div>
+                            <strong>${app.dtiRatio ? app.dtiRatio + '%' : 'N/A'}</strong>
+                        </div>
+                    </div>
+
+                    <div style="border: 1px solid var(--border-color); padding: 0.75rem; border-radius: 6px; background: #FFFFFF;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                            <strong>Loan Scheme:</strong>
+                            <span style="font-weight: 600; color: var(--primary-blue);">${escapeHtml(app.loanName || 'N/A')}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.25rem;">
+                            <span>Requested Amount:</span>
+                            <strong>${formatCurrency(app.requestedAmount)}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.25rem;">
+                            <span>Max Eligible Amount:</span>
+                            <strong style="color: var(--success-green);">${formatCurrency(app.calculatedEligibleAmount)}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.25rem;">
+                            <span>Tenure:</span>
+                            <span>${app.tenureMonths} Months</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                            <span>Eligibility Reason:</span>
+                            <span style="font-style: italic; color: var(--text-muted);">${escapeHtml(app.outcomeReason || 'Calculated via EligibilityEngine')}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                body.innerHTML = `<div class="alert alert-error">Could not retrieve application details: ${escapeHtml(res?.data?.message || 'Error')}</div>`;
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('detailsModal').style.display = 'none';
+        }
+
+        // Close on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Close on backdrop click
+        document.getElementById('detailsModal').addEventListener('click', (e) => {
+            if (e.target.id === 'detailsModal') closeModal();
+        });
 
         function formatStatus(status) {
             if (status === 'UNDER_REVIEW') return 'Under Review';

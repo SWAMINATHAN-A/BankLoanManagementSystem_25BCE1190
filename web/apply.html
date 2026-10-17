@@ -32,6 +32,57 @@
 
         <div id="alertBox"></div>
 
+        <!-- Educational Interactive Loan EMI Calculator (Optional Feature Enhancement) -->
+        <div class="card" style="border-left: 4px solid var(--accent-blue); background: #FFFFFF;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <h2 class="card-title" style="margin-bottom: 0; border: none; font-size: 1.05rem;">
+                    <span>Loan EMI & Repayment Estimator</span>
+                </h2>
+                <span class="badge badge-blue">Educational Calculator</span>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">
+                Monthly repayment simulation using reducing-balance formula: <code>EMI = [P × r × (1+r)^n] / [(1+r)^n - 1]</code>
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
+                <div class="form-group">
+                    <label class="form-label" for="calcPrincipal">Principal Amount (₹)</label>
+                    <input type="number" id="calcPrincipal" class="form-control" value="1000000" min="10000" step="10000">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="calcInterest">Annual Interest Rate (%)</label>
+                    <input type="number" id="calcInterest" class="form-control" value="8.5" min="1" max="30" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="calcTenure">Tenure (Months)</label>
+                    <input type="number" id="calcTenure" class="form-control" value="60" min="6" max="360" step="6">
+                </div>
+                <div>
+                    <button type="button" id="btnSyncToForm" class="btn btn-secondary" style="width: 100%; font-size: 0.85rem;" title="Fill loan details into the application form below">
+                        ↓ Use in Form
+                    </button>
+                </div>
+            </div>
+
+            <!-- Calculated Breakdown Display -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.85rem; margin-top: 1.15rem; background: #F8FAFC; padding: 0.95rem 1.15rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                <div>
+                    <div style="font-size: 0.74rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.03em;">Monthly EMI</div>
+                    <div id="emiMonthlyVal" style="font-size: 1.35rem; font-weight: 700; color: var(--brand-blue); margin-top: 2px;">₹20,517</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.74rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.03em;">Total Interest</div>
+                    <div id="emiTotalInterest" style="font-size: 1.35rem; font-weight: 700; color: var(--status-review); margin-top: 2px;">₹2,30,992</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.74rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.03em;">Total Payable</div>
+                    <div id="emiTotalPayment" style="font-size: 1.35rem; font-weight: 700; color: var(--status-approved); margin-top: 2px;">₹12,30,992</div>
+                </div>
+            </div>
+            <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 0.65rem;">
+                * Assumption: Fixed reducing interest rate compounded monthly. Educational estimate for demonstration purposes.
+            </div>
+        </div>
+
         <!-- Eligibility Result Box -->
         <div id="resultBox" class="card" style="display: none; background: #F0FDF4; border-color: #86EFAC;">
             <h2 class="card-title" style="color: #15803D; margin-bottom: 0.75rem;">Eligibility Result</h2>
@@ -317,7 +368,60 @@
             }
         });
 
+        // Live EMI Calculator Logic
+        function updateLiveEmi() {
+            const p = parseFloat(document.getElementById('calcPrincipal').value) || 0;
+            const rAnnual = parseFloat(document.getElementById('calcInterest').value) || 0;
+            const n = parseInt(document.getElementById('calcTenure').value) || 0;
+
+            if (p <= 0 || rAnnual <= 0 || n <= 0) {
+                document.getElementById('emiMonthlyVal').textContent = '₹0';
+                document.getElementById('emiTotalInterest').textContent = '₹0';
+                document.getElementById('emiTotalPayment').textContent = '₹0';
+                return;
+            }
+
+            const rMonthly = (rAnnual / 12) / 100;
+            const factor = Math.pow(1 + rMonthly, n);
+            const emi = (p * rMonthly * factor) / (factor - 1);
+            const totalPayment = emi * n;
+            const totalInterest = totalPayment - p;
+
+            document.getElementById('emiMonthlyVal').textContent = formatCurrency(Math.round(emi));
+            document.getElementById('emiTotalInterest').textContent = formatCurrency(Math.round(totalInterest));
+            document.getElementById('emiTotalPayment').textContent = formatCurrency(Math.round(totalPayment));
+        }
+
+        ['calcPrincipal', 'calcInterest', 'calcTenure'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', updateLiveEmi);
+        });
+
+        document.getElementById('btnSyncToForm').addEventListener('click', () => {
+            const p = document.getElementById('calcPrincipal').value;
+            const n = document.getElementById('calcTenure').value;
+            if (p) document.getElementById('requestedAmount').value = p;
+            if (n) document.getElementById('tenureMonths').value = n;
+
+            // Scroll gently to loan details section
+            document.getElementById('requestedAmount').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            document.getElementById('requestedAmount').focus();
+        });
+
+        // When user changes loan product dropdown in form, sync the interest rate to the calculator
+        document.getElementById('loanTypeId').addEventListener('change', async function() {
+            const res = await API.getLoanTypes();
+            if (res && res.ok && Array.isArray(res.data)) {
+                const selected = res.data.find(lt => String(lt.loanTypeId) === String(this.value));
+                if (selected && selected.interestRate) {
+                    document.getElementById('calcInterest').value = selected.interestRate;
+                    updateLiveEmi();
+                }
+            }
+        });
+
         loadLoanTypes();
+        updateLiveEmi();
     </script>
 </body>
 </html>
