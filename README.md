@@ -1,170 +1,82 @@
-# Bank Loan Management System — DBMS PAT-4 Practical
+# Bank Loan Management System
 
-A lightweight, student-friendly full-stack web application for bank loan management, credit eligibility estimation, and DBMS demonstration built for the college DBMS PAT-4 practical.
+[![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)](https://www.oracle.com/java/)
+[![Oracle](https://img.shields.io/badge/Oracle-11g%20XE-F80000?logo=oracle&logoColor=white)](https://www.oracle.com/database/)
+[![JDBC](https://img.shields.io/badge/Driver-JDBC%20Thin-007396)](https://www.oracle.com/database/technologies/appdev/jdbc.html)
+[![Frontend](https://img.shields.io/badge/Frontend-HTML5%20%7C%20CSS3%20%7C%20JS-E34F26)](https://developer.mozilla.org/)
+[![DBMS](https://img.shields.io/badge/Coursework-DBMS%20PAT--4-blue)]()
 
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript.
-- **Backend**: Java OpenJDK (`com.sun.net.httpserver.HttpServer` on port `8085`).
-- **Database**: Oracle Database 11g Express Edition (XE).
-- **Connectivity**: Oracle JDBC Driver (`ojdbc6.jar`) and Windows 64-bit ODBC (`OracleXE_PAT4`).
-
----
-
-## 1. Technologies & Prerequisites
-
-1. **Java JDK 17+ or 21 LTS** installed and available in Windows PATH.
-2. **Oracle Database 11g Express Edition (XE)** installed on Windows.
-3. **Oracle JDBC Driver**: Included in the project under `lib/ojdbc6.jar`.
-4. **Windows 64-bit ODBC DSN**: Configured as `OracleXE_PAT4` using the `Oracle in XE` driver.
+A lightweight, full-stack bank loan processing application and DBMS demonstration built for the college **DBMS PAT-4** practical. It integrates a native Java HTTP backend with an Oracle 11g Express Edition database to provide role-based authentication, loan application workflows, automated credit eligibility estimation, and interactive SQL demonstrations.
 
 ---
 
-## 2. Verify Oracle Services & Java
+## Choose How to Run
 
-Open PowerShell and verify:
+### Option 1: Live Demo (Recommended)
 
-```powershell
-# 1. Check Java version
-java -version
-javac -version
+> **Live URL:** [https://courts-advertisement-crafts-effective.trycloudflare.com](https://courts-advertisement-crafts-effective.trycloudflare.com)
 
-# 2. Verify Oracle XE Windows Services are running
-Get-Service -Name *Oracle* | Format-Table -AutoSize
-```
-Ensure `OracleServiceXE` and `OracleXETNSListener` both report **Running**.
+**Demo Credentials:**
+- **Administrator:** `admin` / `admin123`
+- **Loan Officer:** `officer1` / `officer123`
+
+> [!NOTE]
+> *This is a temporary public demo connected to the host laptop. The host laptop, Oracle XE database, Java backend, and Cloudflare Tunnel must remain running for the link to be reachable.*
 
 ---
 
-## 3. Database Credentials Configuration
+### Option 2: Run Locally
 
-Your local credentials are kept securely in `config/db.properties` (never committed to git):
-
-1. Check or create `config/db.properties`:
-   ```powershell
-   Copy-Item db.properties.example config\db.properties
+1. **Prerequisites:** Install Java 21 (or 17+) and Oracle Database 11g Express Edition.
+2. **Configure Database:** Copy `db.properties.example` to `config/db.properties` and update with your local Oracle port, username, and password.
+3. **Initialize Schema:** For a fresh database, execute `sql/01_schema.sql` and `sql/02_sample_data.sql` in your Oracle XE account.
+4. **Compile & Start:**
+   ```cmd
+   .\compile.bat
+   .\run.bat
    ```
-2. Verify that `config/db.properties` contains your Oracle username and password:
-   ```properties
-   server.port=8085
-   db.driver=oracle.jdbc.OracleDriver
-   db.url=jdbc:oracle:thin:@localhost:1521:xe
-   db.username=pat4_user
-   db.password=Pat4User123
-
-   odbc.dsn=OracleXE_PAT4
-   odbc.driver=Oracle in XE
-   odbc.username=pat4_user
-   odbc.password=Pat4User123
-   ```
+5. **Access Application:** Open [http://localhost:8085](http://localhost:8085) in your web browser.
 
 ---
 
-## 4. Database Setup (Fresh Installations Only)
+## Tech Stack
 
-> **Important**: If your database is already populated, **do NOT re-run these scripts**, as they would attempt to re-create existing tables.
+| Layer | Technologies |
+| :--- | :--- |
+| **Frontend** | HTML5 · CSS3 · Vanilla JavaScript (SPA, Fetch API) |
+| **Backend** | Java 21 OpenJDK (`com.sun.net.httpserver.HttpServer` on port `8085`) |
+| **Database** | Oracle Database 11g Express Edition (XE) |
+| **Connectivity** | Oracle JDBC Thin Driver (`ojdbc6.jar`) · Windows ODBC (`OracleXE_PAT4`) |
+| **Tooling & VCS** | Git · GitHub · Batch Scripts (`compile.bat`, `run.bat`, `public_url.bat`) |
 
-If setting up on a completely fresh Oracle instance:
+---
 
-```cmd
-# Run Schema DDL (Creates the 8 tables and sequences)
-sqlplus pat4_user/Pat4User123@localhost:1521/xe @sql/01_schema.sql
+## Key Features
 
-# Seed Initial Sample Data
-sqlplus pat4_user/Pat4User123@localhost:1521/xe @sql/02_sample_data.sql
-```
+- **Role-Based Authentication:** Secure login for Administrator and Loan Officer accounts using salted SHA-256 password hashing.
+- **Interactive Dashboard:** Real-time metrics showing total applications, volume, and approval breakdowns retrieved directly from Oracle.
+- **Loan Application Processing:** Complete workflow to create, view, search, review, and approve or reject applicant files.
+- **Eligibility & EMI Calculator:** Automated Debt-to-Income (DTI) ratio evaluation and loan eligibility calculation engine.
+- **Live SQL Demonstrations:** Interactive web console to run live DDL (`CREATE`/`ALTER`), DML (`INSERT`/`UPDATE`/`DELETE`), and DQL (multi-table relational joins).
+- **Database Connectivity Checks:** Independent status diagnostic buttons for Oracle JDBC connectivity and Windows 64-bit ODBC DSN.
 
-### How to verify all 8 tables and sample records exist:
-```cmd
-sqlplus pat4_user/Pat4User123@localhost:1521/xe
-```
-Then run:
-```sql
-SELECT table_name FROM user_tables ORDER BY table_name;
+---
 
-SELECT 'CUSTOMERS' AS tbl, COUNT(*) AS cnt FROM CUSTOMERS
-UNION ALL SELECT 'LOAN_APPLICATIONS', COUNT(*) FROM LOAN_APPLICATIONS
-UNION ALL SELECT 'LOAN_TYPES', COUNT(*) FROM LOAN_TYPES;
+## Database
+
+### Relational Tables (8)
+`USERS` · `CUSTOMERS` · `EMPLOYMENT_DETAILS` · `FINANCIAL_DETAILS` · `LOAN_TYPES` · `LOAN_APPLICATIONS` · `LOAN_DOCUMENTS` · `LOAN_REPAYMENTS`
+
+### Architecture
+```mermaid
+flowchart LR
+    A["Browser (HTML5 / CSS3 / JS)"] -->|"HTTP / REST API (Port 8085)"| B["Java Backend (HttpServer)"]
+    B -->|"Oracle Thin JDBC (ojdbc6.jar)"| C["Oracle XE 11g (Port 1521)"]
 ```
 
 ---
 
-## 5. How to Compile and Run the Application
+## Repositories
 
-From `BankLoanManagementSystem`:
-
-```cmd
-# Step 1: Compile Java source code into bin/
-.\compile.bat
-
-# Step 2: Start the Java HTTP server
-.\run.bat
-```
-
-Open your browser to:
-👉 **`http://localhost:8085`**
-
----
-
-## 6. Demonstration Login Credentials
-
-- **Username:** `admin`
-- **Password:** `admin123`
-
-*(On the login screen, click **"Fill Demo Credentials"** to populate automatically).*
-
----
-
-## 7. How to Test Database Connectivity
-
-### A. Testing JDBC (Java to Oracle)
-- Go to the **"Database Connectivity"** tab in the web menu.
-- Click **"Test JDBC Connection"**.
-- The backend connects directly to Oracle 11g XE using `ojdbc6.jar` and reports database product, version, connected username (`PAT4_USER`), table count, and response latency (~22ms).
-
-### B. Testing ODBC Separately (Windows to Oracle)
-- On the **"Database Connectivity"** tab, click **"Test ODBC Connection Separately"**.
-- This executes `sql/test_odbc_connection.ps1` using native Windows `System.Data.Odbc` against DSN `OracleXE_PAT4` and displays the genuine connection result.
-
----
-
-## 8. College Practical Demo Flow
-
-1. **Sign In**: Login using `admin` / `admin123` or `officer1` / `officer123`.
-2. **Dashboard**: View the simple 4-box summary of applications and recent records retrieved from Oracle.
-3. **Apply for Loan**:
-   - Enter your own applicant details, income, banking balances, and requested loan amount.
-   - Click **"Check Eligibility Only"** to test the Java eligibility service.
-   - Click **"Submit & Save to Oracle Database"** to execute a multi-table database transaction.
-4. **View Applications**: See your newly submitted application appear in the searchable table.
-5. **SQL Queries (DBMS)**:
-   - **DDL**: Click `CREATE TABLE` and `ALTER TABLE` to demonstrate Data Definition Language.
-   - **DML**: Click `INSERT`, `UPDATE`, and `DELETE` to demonstrate Data Manipulation Language.
-   - **DQL**: Click `3-Table Relational JOIN` and `GROUP BY & Aggregation` to demonstrate relational queries.
-6. **Database Connectivity**: Open the dedicated tab and demonstrate both independent JDBC and ODBC test buttons.
-
----
-
-## 9. Live Professor Evaluation & Demonstration
-
-### Public Demo Access
-For professor evaluation without requiring local Oracle or Java installation on the reviewer's machine:
-- **Temporary Live HTTPS Demo Link**: [https://courts-advertisement-crafts-effective.trycloudflare.com](https://courts-advertisement-crafts-effective.trycloudflare.com)
-- **Demo Credentials**:
-  - Administrator: `admin` / `admin123`
-  - Loan Officer: `officer1` / `officer123`
-
-*(Note: The temporary live link routes securely to the active local Java backend on port 8085 and connected Oracle 11g XE database while the project server is running).*
-
-### How to Start the Public URL Helper
-To regenerate or restart the temporary tunnel at any time:
-```cmd
-.\public_url.bat
-```
-The helper script verifies that the Java server is listening on port 8085 and starts an encrypted tunnel without modifying firewall rules or exposing Oracle port 1521.
-
----
-
-## 10. Repository Information
-
-- **Original Project Repository**: [https://github.com/arushigrover07/Bank_Loan-Management-System](https://github.com/arushigrover07/Bank_Loan-Management-System)
-- **Course Evaluation Submission Repository**: [https://github.com/arushigrover07/BankLoanManagementSystem_25BCE1190](https://github.com/arushigrover07/BankLoanManagementSystem_25BCE1190)
-
+- **Personal Repository:** [https://github.com/arushigrover07/Bank_Loan-Management-System](https://github.com/arushigrover07/Bank_Loan-Management-System)
+- **Submission Repository:** [https://github.com/arushigrover07/BankLoanManagementSystem_25BCE1190](https://github.com/arushigrover07/BankLoanManagementSystem_25BCE1190)
