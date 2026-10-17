@@ -12,7 +12,38 @@ A lightweight, full-stack bank loan processing application and DBMS demonstratio
 
 ## Choose How to Run
 
-### Option 1: Live Demo (Recommended)
+### Option 1: Run Locally (Recommended for Professor Evaluation)
+
+1. **Prerequisites:**
+   - Java 21 (or 17+) configured in your system `PATH`.
+   - Oracle Database 11g Express Edition installed and running (`OracleServiceXE` and `OracleXETNSListener` active).
+2. **Configure Database Credentials:**
+   - Copy `db.properties.example` to `config/db.properties`.
+   - Update with your local Oracle port, username, and password:
+     ```properties
+     server.port=8085
+     db.url=jdbc:oracle:thin:@localhost:1521:xe
+     db.username=pat4_user
+     db.password=YOUR_LOCAL_PASSWORD
+     ```
+3. **Initialize Database (Fresh Installations Only):**
+   - Execute the schema DDL in [sql/01_schema.sql](sql/01_schema.sql) followed by sample records in [sql/02_sample_data.sql](sql/02_sample_data.sql) in your local Oracle user account.
+4. **Compile & Start Server:**
+   ```cmd
+   .\compile.bat
+   .\run.bat
+   ```
+5. **Access Application:**
+   - Open [http://localhost:8085](http://localhost:8085) in your web browser.
+   - *Note: `http://localhost:8085` connects to the local server running on that specific computer. It will only open on the machine where the Java backend is actively running.*
+
+**Evaluation Demo Credentials:**
+- **Administrator:** `admin` / `admin123`
+- **Loan Officer:** `officer1` / `officer123`
+
+---
+
+### Option 2: Live Demo (Temporary)
 
 > **Live URL:** [https://courts-advertisement-crafts-effective.trycloudflare.com](https://courts-advertisement-crafts-effective.trycloudflare.com)
 
@@ -22,20 +53,6 @@ A lightweight, full-stack bank loan processing application and DBMS demonstratio
 
 > [!NOTE]
 > *This is a temporary public demo connected to the host laptop. The host laptop, Oracle XE database, Java backend, and Cloudflare Tunnel must remain running for the link to be reachable.*
-
----
-
-### Option 2: Run Locally
-
-1. **Prerequisites:** Install Java 21 (or 17+) and Oracle Database 11g Express Edition.
-2. **Configure Database:** Copy `db.properties.example` to `config/db.properties` and update with your local Oracle port, username, and password.
-3. **Initialize Schema:** For a fresh database, execute `sql/01_schema.sql` and `sql/02_sample_data.sql` in your Oracle XE account.
-4. **Compile & Start:**
-   ```cmd
-   .\compile.bat
-   .\run.bat
-   ```
-5. **Access Application:** Open [http://localhost:8085](http://localhost:8085) in your web browser.
 
 ---
 
