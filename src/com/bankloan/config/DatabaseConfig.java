@@ -49,6 +49,12 @@ public class DatabaseConfig {
     }
 
     public int getServerPort() {
+        String envPort = System.getenv("PORT");
+        if (envPort != null && !envPort.trim().isEmpty()) {
+            try {
+                return Integer.parseInt(envPort.trim());
+            } catch (NumberFormatException ignored) {}
+        }
         String val = props.getProperty("server.port", "8085");
         try {
             return Integer.parseInt(val.trim());
@@ -58,18 +64,34 @@ public class DatabaseConfig {
     }
 
     public String getDbDriver() {
+        String envDriver = System.getenv("DB_DRIVER");
+        if (envDriver != null && !envDriver.trim().isEmpty()) {
+            return envDriver.trim();
+        }
         return props.getProperty("db.driver", "oracle.jdbc.OracleDriver").trim();
     }
 
     public String getDbUrl() {
+        String envUrl = System.getenv("DB_URL");
+        if (envUrl != null && !envUrl.trim().isEmpty()) {
+            return envUrl.trim();
+        }
         return props.getProperty("db.url", "jdbc:oracle:thin:@localhost:1521:xe").trim();
     }
 
     public String getDbUsername() {
+        String envUser = System.getenv("DB_USERNAME");
+        if (envUser != null && !envUser.trim().isEmpty()) {
+            return envUser.trim();
+        }
         return props.getProperty("db.username", "").trim();
     }
 
     public String getDbPassword() {
+        String envPass = System.getenv("DB_PASSWORD");
+        if (envPass != null && !envPass.trim().isEmpty()) {
+            return envPass.trim();
+        }
         return props.getProperty("db.password", "").trim();
     }
 

@@ -12,6 +12,11 @@ db.properties
 logs/
 temp/
 *.tmp
+*.backup
+
+# Standalone tools and local tunnel binaries
+tools/
+*.exe
 
 # Operating system and IDE metadata
 .DS_Store

@@ -128,7 +128,7 @@ Open your browser to:
 
 ## 8. College Practical Demo Flow
 
-1. **Sign In**: Login using `admin` / `admin123`.
+1. **Sign In**: Login using `admin` / `admin123` or `officer1` / `officer123`.
 2. **Dashboard**: View the simple 4-box summary of applications and recent records retrieved from Oracle.
 3. **Apply for Loan**:
    - Enter your own applicant details, income, banking balances, and requested loan amount.
@@ -140,3 +140,31 @@ Open your browser to:
    - **DML**: Click `INSERT`, `UPDATE`, and `DELETE` to demonstrate Data Manipulation Language.
    - **DQL**: Click `3-Table Relational JOIN` and `GROUP BY & Aggregation` to demonstrate relational queries.
 6. **Database Connectivity**: Open the dedicated tab and demonstrate both independent JDBC and ODBC test buttons.
+
+---
+
+## 9. Live Professor Evaluation & Demonstration
+
+### Public Demo Access
+For professor evaluation without requiring local Oracle or Java installation on the reviewer's machine:
+- **Temporary Live HTTPS Demo Link**: [https://courts-advertisement-crafts-effective.trycloudflare.com](https://courts-advertisement-crafts-effective.trycloudflare.com)
+- **Demo Credentials**:
+  - Administrator: `admin` / `admin123`
+  - Loan Officer: `officer1` / `officer123`
+
+*(Note: The temporary live link routes securely to the active local Java backend on port 8085 and connected Oracle 11g XE database while the project server is running).*
+
+### How to Start the Public URL Helper
+To regenerate or restart the temporary tunnel at any time:
+```cmd
+.\public_url.bat
+```
+The helper script verifies that the Java server is listening on port 8085 and starts an encrypted tunnel without modifying firewall rules or exposing Oracle port 1521.
+
+---
+
+## 10. Repository Information
+
+- **Original Project Repository**: [https://github.com/arushigrover07/Bank_Loan-Management-System](https://github.com/arushigrover07/Bank_Loan-Management-System)
+- **Course Evaluation Submission Repository**: [https://github.com/arushigrover07/BankLoanManagementSystem_25BCE1190](https://github.com/arushigrover07/BankLoanManagementSystem_25BCE1190)
+

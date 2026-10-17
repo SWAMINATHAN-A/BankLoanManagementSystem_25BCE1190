@@ -1,0 +1,16 @@
+# Render Blueprint Configuration (render.yaml)
+# https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: bankloan-management-system
+    env: docker
+    plan: free
+    region: oregon
+    dockerfilePath: Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: false
+    envVars:
+      - key: PORT
+        value: 8085
+      # Note: DB_URL, DB_USERNAME, and DB_PASSWORD are set as secret environment
+      # variables in the Render Dashboard so they are never stored in Git.
